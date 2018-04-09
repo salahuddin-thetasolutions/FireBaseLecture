@@ -1,0 +1,73 @@
+{
+  "project_info": {
+    "project_number": "813306922116",
+    "firebase_url": "https://android-bbee8.firebaseio.com",
+    "project_id": "android-bbee8",
+    "storage_bucket": "android-bbee8.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:813306922116:android:802a1e4d605c9b5e",
+        "android_client_info": {
+          "package_name": "theta.solutions.fcmdatabase"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "813306922116-ll53djdl9s06tmkbvt3l4mtra77m40fs.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyA8tWpxeCSwHBamJHppMPPmBiMTpBe0I38"
+        }
+      ],
+      "services": {
+        "analytics_service": {
+          "status": 1
+        },
+        "appinvite_service": {
+          "status": 1,
+          "other_platform_oauth_client": []
+        },
+        "ads_service": {
+          "status": 2
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:813306922116:android:b8af4e958a32251f",
+        "android_client_info": {
+          "package_name": "theta.solutions.firebaselecture"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "813306922116-ll53djdl9s06tmkbvt3l4mtra77m40fs.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyA8tWpxeCSwHBamJHppMPPmBiMTpBe0I38"
+        }
+      ],
+      "services": {
+        "analytics_service": {
+          "status": 1
+        },
+        "appinvite_service": {
+          "status": 1,
+          "other_platform_oauth_client": []
+        },
+        "ads_service": {
+          "status": 2
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
