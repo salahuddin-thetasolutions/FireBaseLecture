@@ -1,20 +1,37 @@
 package theta.solutions.firebaselecture;
 
+import android.content.ContentResolver;
+import android.content.Intent;
+import android.graphics.Bitmap;
+import android.net.Uri;
+import android.provider.MediaStore;
+import android.support.annotation.NonNull;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.text.TextUtils;
 import android.util.Log;
 import android.view.View;
+import android.webkit.MimeTypeMap;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.ImageView;
 import android.widget.TextView;
+import android.widget.Toast;
 
+import com.google.android.gms.tasks.OnFailureListener;
+import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
+import com.google.firebase.storage.FirebaseStorage;
+import com.google.firebase.storage.StorageReference;
+import com.google.firebase.storage.UploadTask;
 
+import java.io.ByteArrayOutputStream;
+import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.util.ArrayList;
 
 public class MainActivity extends AppCompatActivity {
@@ -25,6 +42,11 @@ public class MainActivity extends AppCompatActivity {
     private DatabaseReference mFirebaseDatabase;
     private FirebaseDatabase mFirebaseInstance;
     private String userId;
+    ImageView vi;
+    private Uri imageUri;
+    int Image_Request_Code = 7;
+    private StorageReference storageReference;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -41,7 +63,7 @@ public class MainActivity extends AppCompatActivity {
 
         // get reference to 'users' node
         mFirebaseDatabase = mFirebaseInstance.getReference("users");
-
+        storageReference= FirebaseStorage.getInstance().getReference();
 
         btnSave.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -55,8 +77,18 @@ public class MainActivity extends AppCompatActivity {
                 }
             }
         });
-        GetUserById();
-        GetAllUser();
+        vi = (ImageView) findViewById(R.id.img);
+        vi.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Intent intent = new Intent();
+                intent.setType("image/*");
+                intent.setAction(Intent.ACTION_GET_CONTENT);
+                startActivityForResult(Intent.createChooser(intent,"Select Image"),0);
+            }
+        });
+//        GetUserById();
+//        GetAllUser();
     }
 
     private void GetAllUser() {
@@ -125,5 +157,72 @@ public class MainActivity extends AppCompatActivity {
         User user = new User(name, Email);
 
         mFirebaseDatabase.child(userId).setValue(user);
+        UploadImage();
+    }
+
+    private void UploadImage() {
+        if(imageUri != null) {
+           // StorageReference filePath = FirebaseStorage.getInstance().getReference();
+            FirebaseStorage storage = FirebaseStorage.getInstance();
+            StorageReference storageRef = storage.getReferenceFromUrl("gs://android-bbee8.appspot.com/");
+            StorageReference mountainImagesRef = storageRef.child("images/" + userId + ".jpg");
+
+
+            Bitmap bitmap = null;
+            try {
+                bitmap = MediaStore.Images.Media.getBitmap(getApplication().getContentResolver(), imageUri);
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+
+            ByteArrayOutputStream baos = new ByteArrayOutputStream();
+            bitmap.compress(Bitmap.CompressFormat.JPEG, 20, baos);
+            byte[] data = baos.toByteArray();
+            UploadTask uploadTask = mountainImagesRef.putBytes(data);
+
+            uploadTask.addOnFailureListener(new OnFailureListener() {
+                @Override
+                public void onFailure(@NonNull Exception e) {
+//                    finish();
+                    Toast.makeText(MainActivity.this, "", Toast.LENGTH_SHORT).show();
+
+                }
+            });
+            uploadTask.addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
+                @Override
+                public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
+                    Uri downloadUrl = taskSnapshot.getDownloadUrl();
+
+                    //Map newImage = new HashMap();
+                    // newImage.put("profileImageUrl", downloadUrl.toString());
+                   mFirebaseDatabase.child(userId).child("profileImageUrl").setValue(downloadUrl.toString());
+
+//                    finish();
+                    Toast.makeText(MainActivity.this, "Successfully saved", Toast.LENGTH_SHORT).show();
+                }
+            });
+        }
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        if(requestCode == 0 && resultCode == RESULT_OK){
+            imageUri = data.getData();
+
+            try{
+                Bitmap bitmap = MediaStore.Images.Media.getBitmap(getContentResolver(),imageUri);
+                vi.setImageBitmap(bitmap);
+            } catch (FileNotFoundException e) {
+                e.printStackTrace();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+    }
+    public String getActualImage(Uri uri){
+        ContentResolver contentResolver = getContentResolver();
+        MimeTypeMap mimeTypeMap = MimeTypeMap.getSingleton();
+        return  mimeTypeMap.getExtensionFromMimeType(contentResolver.getType(uri));
     }
 }
